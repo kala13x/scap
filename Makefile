@@ -1,4 +1,4 @@
-LIB = -lcurl
+LIB = -lnsl
 OBJ = o
 CFLAGS = -g -O2 -Wall
 PREFIX = /usr/local

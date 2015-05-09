@@ -25,12 +25,46 @@
 
 
 /*---------------------------------------------
+| Structure of packets
+---------------------------------------------*/
+typedef struct {
+	int tcp;
+	int udp; 
+	int icmp;
+	int igmp; 
+	int total;
+	int other;
+} ScapPackets;
+
+
+/*---------------------------------------------
+| Initialise sCap packets
+---------------------------------------------*/
+void init_scap_packets(ScapPackets * scap) 
+{
+	scap->tcp = 0;
+	scap->udp = 0;
+	scap->icmp = 0;
+	scap->igmp = 0;
+	scap->total = 0;
+	scap->other = 0;
+}
+
+
+/*---------------------------------------------
 | Main function
 ---------------------------------------------*/
 int main(int argc, char **argv)
 {
+	/* Used variables */
+	ScapPackets scap;
+
+	/* Initialise scap */
+	init_scap_packets(&scap);
     init_slog("scap", 2);
-    slog(0, "TODO");
+
+    /* Todo */
+    slog(0, "[LIVE] TODO");
 
     return 0;
 }
