@@ -37,8 +37,10 @@ void greet(void)
 ---------------------------------------------*/
 void usage(void) 
 {
-    printf("Usage: sCap\n");
+    printf("Usage: scap [-i] [-d] [-h]\n");
     printf("options are:\n");
-    printf(" No options right now\n");
+    printf(" -i         # dump header info in file\n");
+    printf(" -d         # dump data in file\n");
+    printf(" -h         # print help and usage\n");
     printf("\n");
 }

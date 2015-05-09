@@ -97,7 +97,7 @@ void log_ip(unsigned char* buf, int size)
 /*---------------------------------------------
 | Log tcp packets in file
 ---------------------------------------------*/
-void log_tcp(unsigned char* buf, int size)
+void log_tcp(short dump, unsigned char* buf, int size)
 {
     /* Used variables */
     unsigned short iph_len;
@@ -128,24 +128,28 @@ void log_tcp(unsigned char* buf, int size)
     slog_to_file("[TCP] Checksum             : %d", ntohs(tcph->check));
     slog_to_file("[TCP] Urgent Pointer       : %d\n\n", tcph->urg_ptr);
 
-    /* Dump ip header in file */
-    slog_to_file("[IP] Header");
-    dump_data(buf, iph_len);
-    
-    /* Dump tcp header in file */
-    slog_to_file("[TCP] Header");
-    dump_data(buf + iph_len, tcph->doff * 4);
-         
-    /* Dump data playload */
-    slog_to_file("[DATA] Payload"); 
-    dump_data(buf + iph_len + tcph->doff*4 , (size - tcph->doff * 4 - iph->ihl * 4));
+    /* Dump data if flag is enabled */
+    if (dump) 
+    {
+        /* Dump ip header in file */
+        slog_to_file("[IP] Header");
+        dump_data(buf, iph_len);
+        
+        /* Dump tcp header in file */
+        slog_to_file("[TCP] Header");
+        dump_data(buf + iph_len, tcph->doff * 4);
+             
+        /* Dump data playload */
+        slog_to_file("[DATA] Payload"); 
+        dump_data(buf + iph_len + tcph->doff*4 , (size - tcph->doff * 4 - iph->ihl * 4));
+    }
 }
 
 
 /*---------------------------------------------
 | Log udp packets in file
 ---------------------------------------------*/
-void log_udp(unsigned char* buf, int size)
+void log_udp(short dump, unsigned char* buf, int size)
 {
     /* Used variables */
     unsigned short iph_len;
@@ -165,15 +169,19 @@ void log_udp(unsigned char* buf, int size)
     slog_to_file("[UDP] Length               : %d", ntohs(udph->len));
     slog_to_file("[UDP] Checksum             : %d\n\n", ntohs(udph->check));
 
-    /* Dump ip header in file */
-    slog_to_file("[IP] Header");
-    dump_data(buf, iph_len);
+    /* Dump data if flag is enabled */
+    if (dump) 
+    {
+        /* Dump ip header in file */
+        slog_to_file("[IP] Header");
+        dump_data(buf, iph_len);
 
-    /* Dump udp header in file */
-    slog_to_file("[UDP] Header");
-    dump_data(buf + iph_len , sizeof(udph));
+        /* Dump udp header in file */
+        slog_to_file("[UDP] Header");
+        dump_data(buf + iph_len , sizeof(udph));
 
-    /* Dump data playload */
-    slog_to_file("[DATA] Payload");  
-    dump_data(buf + iph_len + sizeof(udph), (size - sizeof(udph) - iph->ihl * 4));
+        /* Dump data playload */
+        slog_to_file("[DATA] Payload");  
+        dump_data(buf + iph_len + sizeof(udph), (size - sizeof(udph) - iph->ihl * 4));
+    }
 }

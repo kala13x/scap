@@ -8,8 +8,8 @@ Desc: Get and print additional information
 #include "stdinc.h"
 
 /* Version and build number */
-#define VERSION "0.0.4 Beta"
-#define BUILD 8
+#define VERSION "1.0.2 Beta"
+#define BUILD 16
 
 
 /*---------------------------------------------

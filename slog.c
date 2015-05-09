@@ -247,9 +247,5 @@ void init_slog(char* fname, int max)
     slog_val.to_file = 0;
 
     /* Parse config file */
-    if (parse_config("slog.cfg")) 
-    {
-        slog(0, "[WARNING] - loglevel and/or logtofile flag is not set from config.");
-        return;
-    }
+    parse_config("slog.cfg");
 }

@@ -42,6 +42,15 @@ typedef struct {
 
 
 /*---------------------------------------------
+| Structure of flags
+---------------------------------------------*/
+typedef struct {
+    short info;
+    short data;
+} ScapFlags;
+
+
+/*---------------------------------------------
 | Initialise sCap packets
 ---------------------------------------------*/
 void init_scap_packets(ScapPackets * scap) 
@@ -52,6 +61,16 @@ void init_scap_packets(ScapPackets * scap)
     scap->igmp = 0;
     scap->total = 0;
     scap->other = 0;
+}
+
+
+/*---------------------------------------------
+| Initialise sCap flags
+---------------------------------------------*/
+void init_scap_flags(ScapFlags * scfl) 
+{
+    scfl->info = 0;
+    scfl->data = 0;
 }
 
 
@@ -86,7 +105,7 @@ int create_socket()
     sock = socket(AF_INET , SOCK_RAW , IPPROTO_TCP);
     if (sock < 0)
     {
-        slog(0, "[ERROR] Can not create socket (maybe permissions?)");
+        slog(0, "[ERROR] Can not create socket (requires root)");
         exit(EXIT_FAILURE);
     }
 
@@ -98,7 +117,9 @@ int create_socket()
 | Process packets
 ---------------------------------------------*/
 void read_scap_packet(ScapPackets * scap, 
-                unsigned char* buf, int size)
+                    ScapFlags * scfl,
+                    unsigned char* buf, 
+                    int size)
 {
     /* Used variables */
     struct iphdr* iph = (struct iphdr*)buf;
@@ -115,11 +136,13 @@ void read_scap_packet(ScapPackets * scap,
             break;
         case 6:
             ++scap->tcp;
-            log_tcp(buf, size);
+            if (scfl->info) 
+                log_tcp(scfl->data, buf, size);
             break;
         case 17:
             ++scap->udp;
-            log_udp(buf, size);
+            if (scfl->info) 
+                log_udp(scfl->data, buf, size);
             break;
         default:
             ++scap->other;
@@ -139,11 +162,37 @@ void read_scap_packet(ScapPackets * scap,
 
 
 /*---------------------------------------------
+| Parse cli arguments
+---------------------------------------------*/
+static int parse_arguments(int argc, char *argv[], ScapFlags * scfl)
+{
+    int c;
+    while ( (c = getopt(argc, argv, "i1:d1:h1")) != -1) {
+        switch (c) {
+        case 'i':
+            scfl->info = 1;
+            break;
+        case 'd':
+            scfl->data = 1;
+            break;
+        case 'h':
+        default:
+            usage();
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+
+/*---------------------------------------------
 | Main function
 ---------------------------------------------*/
 int main(int argc, char **argv)
 {
     /* Used variables */
+    ScapFlags scfl;
     ScapPackets scap;
     unsigned char buf[MAXMSG];
     struct sockaddr addr;
@@ -157,10 +206,15 @@ int main(int argc, char **argv)
 
     /* Initialise scap */
     init_scap_packets(&scap);
+    init_scap_flags(&scfl);
     init_slog("scap", 2);
 
     /* Greet */
     greet();
+
+    /* Parse Commandline Arguments */
+    if (parse_arguments(argc, argv, &scfl)) 
+        return 0;
 
     /* Create raw socket */
     sock = create_socket();
@@ -178,7 +232,7 @@ int main(int argc, char **argv)
             slog(0, "[ERROR] Can not get packets");
             break;
         }
-        else read_scap_packet(&scap, buf, size);
+        else read_scap_packet(&scap, &scfl, buf, size);
     }
 
     /* Close socket */

@@ -12,10 +12,10 @@ Desc: Get and dump packets in file
 /*---------------------------------------------
 | Log tcp packets in file
 ---------------------------------------------*/
-void log_tcp(unsigned char* buf, int size);
+void log_tcp(short dump, unsigned char* buf, int size);
 
 
 /*---------------------------------------------
 | Log udp packets in file
 ---------------------------------------------*/
-void log_udp(unsigned char* buf, int size);
+void log_udp(short dump, unsigned char* buf, int size);
