@@ -3,12 +3,13 @@ OBJ = o
 CFLAGS = -g -O2 -Wall
 PREFIX = /usr/local
 
-OBJS = scap.$(OBJ) info.$(OBJ) slog.$(OBJ)
+OBJS = scap.$(OBJ) packet.$(OBJ) info.$(OBJ) slog.$(OBJ)
 
 all: $(OBJS)
 	$(CC) $(CFLAGS) -o scap $(OBJS) $(LIB)
 
 scap.$(OBJ): info.h slog.h stdinc.h
+packet.$(OBJ): packet.h stdinc.h
 info.$(OBJ): info.h stdinc.h
 slog.$(OBJ): slog.h stdinc.h
 
