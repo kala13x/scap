@@ -82,7 +82,7 @@ int create_socket()
     int sock;
 
     /* Create raw socket */
-    sock = socket (AF_INET , SOCK_RAW , IPPROTO_TCP);
+    sock = socket(AF_INET , SOCK_RAW , IPPROTO_TCP);
     if (sock < 0)
     {
         slog(0, "[ERROR] Can not create socket (maybe permissions?)");
@@ -90,6 +90,82 @@ int create_socket()
     }
 
     return sock;
+}
+
+
+/*---------------------------------------------
+| Log tcp packets in file
+---------------------------------------------*/
+void log_tcp(unsigned char* buf, int size)
+{
+    /* Used variables */
+    unsigned short iph_len;
+    struct iphdr *iph = (struct iphdr *)buf;
+     
+    /* Get TCP packet header */
+    iph_len = iph->ihl*4;
+    struct tcphdr *tcph=(struct tcphdr*)(buf+iph_len);
+             
+    /* Log TCP packet header in file */
+    slog_to_file("[LIVE] Captured TCP Packet");          
+    slog_to_file("[TCP] Source Port          : %u", ntohs(tcph->source));
+    slog_to_file("[TCP] Destination Port     : %u", ntohs(tcph->dest));
+    slog_to_file("[TCP] Sequence Number      : %u", ntohl(tcph->seq));
+    slog_to_file("[TCP] Acknowledge Number   : %u", ntohl(tcph->ack_seq));
+    slog_to_file("[TCP] Header Length        : %d DWORDS or %d BYTES" , 
+                        (unsigned int)tcph->doff,(unsigned int)tcph->doff*4);
+    slog_to_file("[TCP] Urgent Flag          : %d", (unsigned int)tcph->urg);
+    slog_to_file("[TCP] Acknowledgement Flag : %d", (unsigned int)tcph->ack);
+    slog_to_file("[TCP] Push Flag            : %d", (unsigned int)tcph->psh);
+    slog_to_file("[TCP] Reset Flag           : %d", (unsigned int)tcph->rst);
+    slog_to_file("[TCP] Synchronise Flag     : %d", (unsigned int)tcph->syn);
+    slog_to_file("[TCP] Finish Flag          : %d", (unsigned int)tcph->fin);
+    slog_to_file("[TCP] Window               : %d", ntohs(tcph->window));
+    slog_to_file("[TCP] Checksum             : %d", ntohs(tcph->check));
+    slog_to_file("[TCP] Urgent Pointer       : %d", tcph->urg_ptr);
+}
+
+
+/*---------------------------------------------
+| Process packets
+---------------------------------------------*/
+void read_scap_packet(ScapPackets * scap, 
+                unsigned char* buf, int size)
+{
+    /* Used variables */
+    struct iphdr* iph = (struct iphdr*)buf;
+    char* out_line;
+
+    /* Get IP header */
+    switch (iph->protocol)
+    {
+        case 1:
+            ++scap->icmp;
+            break;
+        case 2:
+            ++scap->igmp;
+            break;
+        case 6:
+            ++scap->tcp;
+            log_tcp(buf, size);
+            break;
+        case 17:
+            ++scap->udp;
+            break;
+        default:
+            ++scap->other;
+            break;
+    }
+
+    /* Total packet counter */
+    ++scap->total;
+
+    /* Return status in slog format */
+    out_line = ret_slog("[LIVE] TCP: %d   UDP: %d   ICMP: %d   IGMP: %d   Other: %d   Total: %d",
+        scap->tcp, scap->udp, scap->icmp, scap->igmp, scap->other, scap->total);
+
+    /* Print status */
+    printf("%s\r", out_line);
 }
 
 
@@ -102,7 +178,7 @@ int main(int argc, char **argv)
     ScapPackets scap;
     unsigned char buf[MAXMSG];
     struct sockaddr addr;
-    int sock, data;
+    int sock, data, size;
 
     /* Read signals */
     signal(SIGPIPE, sig_handler);
@@ -114,19 +190,26 @@ int main(int argc, char **argv)
     init_scap_packets(&scap);
     init_slog("scap", 2);
 
+    /* Greet */
+    greet();
+
     /* Create raw socket */
     sock = create_socket();
 
     /* Main loop (never ends) */
     while(1)
     {
+        /* Get packet size */
+        size = sizeof addr;
+
         /* Get packet */
-        data = recvfrom(sock, buf, sizeof(buf), 0, &addr, (socklen_t *)sizeof(addr));
-        if(data <0)
+        data = recvfrom(sock, buf, sizeof(buf), 0, &addr, (socklen_t *)&size);
+        if(data < 0)
         {
             slog(0, "[ERROR] Can not get packets");
             break;
         }
+        else read_scap_packet(&scap, buf, size);
     }
 
     /* Close socket */

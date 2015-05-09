@@ -60,30 +60,6 @@ const char* slog_version()
 
 
 /*---------------------------------------------
-| Save log in file
----------------------------------------------*/
-void log_to_file(char *out, char *fname, SystemDate *mdate) 
-{
-    /* Used variables */
-    char filename[32];
-
-    /* Create log filename with date */
-    sprintf(filename, "%s-%02d-%02d-%02d.log", 
-        fname, mdate->year, mdate->mon, mdate->day);
-
-    /* Open file pointer */
-    FILE *fp = fopen(filename, "a");
-    if (fp == NULL) return;
-
-    /* Write key in file */
-    fprintf(fp, "%s", out);
-
-    /* Close file pointer */
-    fclose(fp);
-}
-
-
-/*---------------------------------------------
 | Parse config file
 ---------------------------------------------*/
 int parse_config(char *cfg_name)
@@ -156,13 +132,14 @@ char* ret_slog(char *msg, ...)
 
 
 /*---------------------------------------------
-| Log exiting process
+| Log exiting process in file
 ---------------------------------------------*/
-void slog(int level, char *msg, ...) 
+void slog_to_file(char* msg, ...) 
 {
     /* Used variables */
-    char output[MAXMSG];
+    char filename[32];
     char string[MAXMSG];
+    char* output;
     SystemDate mdate;
 
     /* initialise system date */
@@ -174,19 +151,52 @@ void slog(int level, char *msg, ...)
     vsprintf(string, msg, args);
     va_end(args);
 
+    /* Create log filename with date */
+    sprintf(filename, "%s-%02d-%02d-%02d.log", 
+        slog_val.fname, mdate.year, mdate.mon, mdate.day);
+
+    /* Open file pointer */
+    FILE *fp = fopen(filename, "a");
+    if (fp == NULL) return;
+
+    /* Get string in slog format */
+    output = ret_slog(string);
+
+    /* Write key in file */
+    fprintf(fp, "%s\n", output);
+
+    /* Close file pointer */
+    fclose(fp);
+}
+
+
+/*---------------------------------------------
+| Log exiting process
+---------------------------------------------*/
+void slog(int level, char *msg, ...) 
+{
+    /* Used variables */
+    char* output;
+    char string[MAXMSG];
+
+    /* Read args */
+    va_list args;
+    va_start(args, msg);
+    vsprintf(string, msg, args);
+    va_end(args);
+
     /* Check logging levels */
     if((!level || level <= slog_val.level) && level <= slog_val.l_max) 
     {
-        /* Generate output string with date */
-        sprintf(output, "%02d.%02d.%02d-%02d:%02d:%02d - %s\n", 
-                mdate.year, mdate.mon, mdate.day, mdate.hour, mdate.min, mdate.sec, string);
+        /* Get string in slog format */
+        output = ret_slog(string);
 
         /* Print output */
-        printf("%s", output);
+        printf("%s\n", output);
 
         /* Save log in file */
         if (slog_val.to_file) 
-            log_to_file(output, slog_val.fname, &mdate);
+            slog_to_file(string);
     }
 }
 
