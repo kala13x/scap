@@ -80,6 +80,12 @@ void slog_to_file(char *msg, ...);
 
 
 /*---------------------------------------------
+| Log exiting process in file
+---------------------------------------------*/
+void slog_file(char* msg, ...);
+
+
+/*---------------------------------------------
 | Log exiting process
 ---------------------------------------------*/
 void slog(int level, char *msg, ...);

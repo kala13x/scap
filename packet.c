@@ -11,6 +11,59 @@ Desc: Get and dump packets in file
 
 
 /*---------------------------------------------
+| Dump packet data in file
+---------------------------------------------*/
+void dump_data(unsigned char* data , int size)
+{
+    /* Used variables */
+    int i, j;
+
+    /* Dump whole data */
+    for(i=0 ; i < size ; i++)
+    {
+        /* Dump line in hex */
+        if( i!=0 && i%16==0)
+        {
+            slog_file("         ");
+            for(j=i-16 ; j<i ; j++)
+            {
+                /* Dump number */
+                if(data[j]>=32 && data[j]<=128)
+                    slog_file("%c",(unsigned char)data[j]);
+                else slog_file(".");
+            }
+            slog_file("\n");
+        }
+        
+        /* Dump hex data */
+        if(i % 16 == 0) slog_file("   ");
+            slog_file(" %02X", (unsigned int)data[i]);
+        
+        /* Dump last spaces */
+        if(i == size - 1)
+        {
+            /* Extra spaces */
+            for(j=0; j<15-i%16; j++) slog_file("   ");
+            
+            /* Dump another space */
+            slog_file("         ");
+            
+            /* Dump data */
+            for(j=i-i%16 ; j<=i ; j++)
+            {
+                if(data[j]>=32 && data[j]<=128) slog_file("%c", (unsigned char)data[j]);
+                else slog_file(".");
+            }
+            slog_file("\n");
+        }
+    }
+
+    /* Next line */
+    slog_file("\n");
+}
+
+
+/*---------------------------------------------
 | Log ip header in file
 ---------------------------------------------*/
 void log_ip(unsigned char* buf, int size)
@@ -19,7 +72,7 @@ void log_ip(unsigned char* buf, int size)
     struct sockaddr_in name, dst;
     struct iphdr *iph = (struct iphdr *)buf;
      
-    /* Get ip header */
+    /* Get source and destination */
     memset(&name, 0, sizeof(name));
     name.sin_addr.s_addr = iph->saddr;
     memset(&dst, 0, sizeof(dst));
@@ -27,17 +80,17 @@ void log_ip(unsigned char* buf, int size)
      
     /* Log ip header */
     slog_to_file("[LIVE] Captured IP Header");       
-    slog_to_file("[IP] Version           : %d", (unsigned int)iph->version);
-    slog_to_file("[IP] Header Length     : %d DWORDS or %d Bytes", 
+    slog_to_file("[IP] Version               : %d", (unsigned int)iph->version);
+    slog_to_file("[IP] Header Length         : %d DWORDS or %d Bytes", 
                             (unsigned int)iph->ihl,((unsigned int)(iph->ihl))*4);
-    slog_to_file("[IP] Type Of Service   : %d", (unsigned int)iph->tos);
-    slog_to_file("[IP] Total Length      : %d  Bytes(Size of Packet)", ntohs(iph->tot_len));
-    slog_to_file("[IP] Identification    : %d", ntohs(iph->id));
-    slog_to_file("[IP] TTL               : %d", (unsigned int)iph->ttl);
-    slog_to_file("[IP] Protocol          : %d", (unsigned int)iph->protocol);
-    slog_to_file("[IP] Checksum          : %d", ntohs(iph->check));
-    slog_to_file("[IP] Source IP         : %s", inet_ntoa(name.sin_addr));
-    slog_to_file("[IP] Destination IP    : %s", inet_ntoa(dst.sin_addr));
+    slog_to_file("[IP] Type Of Service       : %d", (unsigned int)iph->tos);
+    slog_to_file("[IP] Total Length          : %d  Bytes(Size of Packet)", ntohs(iph->tot_len));
+    slog_to_file("[IP] Identification        : %d", ntohs(iph->id));
+    slog_to_file("[IP] TTL                   : %d", (unsigned int)iph->ttl);
+    slog_to_file("[IP] Protocol              : %d", (unsigned int)iph->protocol);
+    slog_to_file("[IP] Checksum              : %d", ntohs(iph->check));
+    slog_to_file("[IP] Source IP             : %s", inet_ntoa(name.sin_addr));
+    slog_to_file("[IP] Destination IP        : %s\n", inet_ntoa(dst.sin_addr));
 }
 
 
@@ -74,6 +127,18 @@ void log_tcp(unsigned char* buf, int size)
     slog_to_file("[TCP] Window               : %d", ntohs(tcph->window));
     slog_to_file("[TCP] Checksum             : %d", ntohs(tcph->check));
     slog_to_file("[TCP] Urgent Pointer       : %d\n\n", tcph->urg_ptr);
+
+    /* Dump ip header in file */
+    slog_to_file("[IP] Header");
+    dump_data(buf, iph_len);
+    
+    /* Dump tcp header in file */
+    slog_to_file("[TCP] Header");
+    dump_data(buf + iph_len, tcph->doff * 4);
+         
+    /* Dump data playload */
+    slog_to_file("[DATA] Payload"); 
+    dump_data(buf + iph_len + tcph->doff*4 , (size - tcph->doff * 4 - iph->ihl * 4));
 }
 
 
@@ -95,8 +160,20 @@ void log_udp(unsigned char* buf, int size)
 
     /* Log TCP packet header in file */
     slog_to_file("[LIVE] Captured UDP Packet");               
-    slog_to_file("[UDP] Source Port      : %d", ntohs(udph->source));
-    slog_to_file("[UDP] Destination Port : %d", ntohs(udph->dest));
-    slog_to_file("[UDP] Length           : %d", ntohs(udph->len));
-    slog_to_file("[UDP] Checksum         : %d\n\n", ntohs(udph->check));
+    slog_to_file("[UDP] Source Port          : %d", ntohs(udph->source));
+    slog_to_file("[UDP] Destination Port     : %d", ntohs(udph->dest));
+    slog_to_file("[UDP] Length               : %d", ntohs(udph->len));
+    slog_to_file("[UDP] Checksum             : %d\n\n", ntohs(udph->check));
+
+    /* Dump ip header in file */
+    slog_to_file("[IP] Header");
+    dump_data(buf, iph_len);
+
+    /* Dump udp header in file */
+    slog_to_file("[UDP] Header");
+    dump_data(buf + iph_len , sizeof(udph));
+
+    /* Dump data playload */
+    slog_to_file("[DATA] Payload");  
+    dump_data(buf + iph_len + sizeof(udph), (size - sizeof(udph) - iph->ihl * 4));
 }

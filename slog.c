@@ -134,6 +134,41 @@ char* ret_slog(char *msg, ...)
 /*---------------------------------------------
 | Log exiting process in file
 ---------------------------------------------*/
+void slog_file(char* msg, ...) 
+{
+    /* Used variables */
+    char filename[32];
+    char string[MAXMSG];
+    SystemDate mdate;
+
+    /* initialise system date */
+    init_date(&mdate);
+
+    /* Read args */
+    va_list args;
+    va_start(args, msg);
+    vsprintf(string, msg, args);
+    va_end(args);
+
+    /* Create log filename with date */
+    sprintf(filename, "%s-%02d-%02d-%02d.log", 
+        slog_val.fname, mdate.year, mdate.mon, mdate.day);
+
+    /* Open file pointer */
+    FILE *fp = fopen(filename, "a");
+    if (fp == NULL) return;
+
+    /* Write key in file */
+    fprintf(fp, "%s", string);
+
+    /* Close file pointer */
+    fclose(fp);
+}
+
+
+/*---------------------------------------------
+| Log exiting process in file
+---------------------------------------------*/
 void slog_to_file(char* msg, ...) 
 {
     /* Used variables */
