@@ -23,17 +23,20 @@
 #include "info.h"
 #include "slog.h"
 
+/* Max size of buffer */
+#define MAXMSG 8196
+
 
 /*---------------------------------------------
 | Structure of packets
 ---------------------------------------------*/
 typedef struct {
-	int tcp;
-	int udp; 
-	int icmp;
-	int igmp; 
-	int total;
-	int other;
+    int tcp;
+    int udp; 
+    int icmp;
+    int igmp; 
+    int total;
+    int other;
 } ScapPackets;
 
 
@@ -42,12 +45,51 @@ typedef struct {
 ---------------------------------------------*/
 void init_scap_packets(ScapPackets * scap) 
 {
-	scap->tcp = 0;
-	scap->udp = 0;
-	scap->icmp = 0;
-	scap->igmp = 0;
-	scap->total = 0;
-	scap->other = 0;
+    scap->tcp = 0;
+    scap->udp = 0;
+    scap->icmp = 0;
+    scap->igmp = 0;
+    scap->total = 0;
+    scap->other = 0;
+}
+
+
+/*---------------------------------------------
+| Read signal
+---------------------------------------------*/
+void sig_handler(int sig) 
+{
+    /* Handle signals */
+    if (sig == SIGILL || sig == SIGSEGV) 
+        slog(0, "[ERROR] Can not process data");
+
+    if (sig == SIGPIPE)
+        slog(0, "[ERROR] Broken Pipe");
+
+    if (sig == SIGINT) 
+        slog(0, "[LIVE] Cleanup on exit");
+
+    exit(-1);
+}
+
+
+/*---------------------------------------------
+| Create socket
+---------------------------------------------*/
+int create_socket()
+{
+    /* Used variables */
+    int sock;
+
+    /* Create raw socket */
+    sock = socket (AF_INET , SOCK_RAW , IPPROTO_TCP);
+    if (sock < 0)
+    {
+        slog(0, "[ERROR] Can not create socket (maybe permissions?)");
+        exit(EXIT_FAILURE);
+    }
+
+    return sock;
 }
 
 
@@ -56,15 +98,39 @@ void init_scap_packets(ScapPackets * scap)
 ---------------------------------------------*/
 int main(int argc, char **argv)
 {
-	/* Used variables */
-	ScapPackets scap;
+    /* Used variables */
+    ScapPackets scap;
+    unsigned char buf[MAXMSG];
+    struct sockaddr addr;
+    int sock, data;
 
-	/* Initialise scap */
-	init_scap_packets(&scap);
+    /* Read signals */
+    signal(SIGPIPE, sig_handler);
+    signal(SIGINT, sig_handler);
+    signal(SIGSEGV, sig_handler);
+    signal(SIGILL , sig_handler);
+
+    /* Initialise scap */
+    init_scap_packets(&scap);
     init_slog("scap", 2);
 
-    /* Todo */
-    slog(0, "[LIVE] TODO");
+    /* Create raw socket */
+    sock = create_socket();
+
+    /* Main loop (never ends) */
+    while(1)
+    {
+        /* Get packet */
+        data = recvfrom(sock, buf, sizeof(buf), 0, &addr, (socklen_t *)sizeof(addr));
+        if(data <0)
+        {
+            slog(0, "[ERROR] Can not get packets");
+            break;
+        }
+    }
+
+    /* Close socket */
+    close(sock);
 
     return 0;
 }
