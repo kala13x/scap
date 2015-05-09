@@ -136,12 +136,12 @@ void read_scap_packet(ScapPackets * scap,
             break;
         case 6:
             ++scap->tcp;
-            if (scfl->info) 
+            if (scfl->info || scfl->data) 
                 log_tcp(scfl->data, buf, size);
             break;
         case 17:
             ++scap->udp;
-            if (scfl->info) 
+            if (scfl->info || scfl->data) 
                 log_udp(scfl->data, buf, size);
             break;
         default:

@@ -141,7 +141,7 @@ void log_tcp(short dump, unsigned char* buf, int size)
              
         /* Dump data playload */
         slog_to_file("[DATA] Payload"); 
-        dump_data(buf + iph_len + tcph->doff*4 , (size - tcph->doff * 4 - iph->ihl * 4));
+        dump_data(buf + iph_len + (tcph->doff * 4), (size - (tcph->doff * 4 - iph->ihl * 4)));
     }
 }
 
@@ -182,6 +182,6 @@ void log_udp(short dump, unsigned char* buf, int size)
 
         /* Dump data playload */
         slog_to_file("[DATA] Payload");  
-        dump_data(buf + iph_len + sizeof(udph), (size - sizeof(udph) - iph->ihl * 4));
+        dump_data(buf + iph_len + sizeof(udph), (size - (sizeof(udph) - iph->ihl * 4)));
     }
 }
