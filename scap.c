@@ -119,6 +119,7 @@ void read_scap_packet(ScapPackets * scap,
             break;
         case 17:
             ++scap->udp;
+            log_udp(buf, size);
             break;
         default:
             ++scap->other;

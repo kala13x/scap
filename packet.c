@@ -20,8 +20,8 @@ void log_tcp(unsigned char* buf, int size)
     struct iphdr *iph = (struct iphdr *)buf;
      
     /* Get TCP packet header */
-    iph_len = iph->ihl*4;
-    struct tcphdr *tcph=(struct tcphdr*)(buf+iph_len);
+    iph_len = iph->ihl * 4;
+    struct tcphdr* tcph= (struct tcphdr*)(buf + iph_len);
              
     /* Log TCP packet header in file */
     slog_to_file("[LIVE] Captured TCP Packet");          
@@ -40,4 +40,26 @@ void log_tcp(unsigned char* buf, int size)
     slog_to_file("[TCP] Window               : %d", ntohs(tcph->window));
     slog_to_file("[TCP] Checksum             : %d", ntohs(tcph->check));
     slog_to_file("[TCP] Urgent Pointer       : %d", tcph->urg_ptr);
+}
+
+
+/*---------------------------------------------
+| Log udp packets in file
+---------------------------------------------*/
+void log_udp(unsigned char* buf, int size)
+{
+    /* Used variables */
+    unsigned short iph_len;
+    struct iphdr *iph = (struct iphdr *)buf;
+
+    /* Get UDP packet heaer */
+    iph_len = iph->ihl * 4;
+    struct udphdr* udph = (struct udphdr*)(buf + iph_len);
+     
+    /* Log TCP packet header in file */
+    slog_to_file("[LIVE] Captured UDP Packet");               
+    slog_to_file("[UDP] Source Port      : %d", ntohs(udph->source));
+    slog_to_file("[UDP] Destination Port : %d", ntohs(udph->dest));
+    slog_to_file("[UDP] Length           : %d", ntohs(udph->len));
+    slog_to_file("[UDP] Checksum         : %d", ntohs(udph->check));
 }
