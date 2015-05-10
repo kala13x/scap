@@ -1,4 +1,4 @@
-sCap - Version: 1.0.4 Snapshot Build 21
+sCap - Version: 1.0.5 Snapshot Build 23
 ----
 
 sCap is open source commandline application project which uses system sockets and makes you able to scan, capture and dump incoming tcp/udp/icmp traffic without libcap. Software is written for educational purposes and is distributed in the hope that it will be useful for anyone interested in this field.
