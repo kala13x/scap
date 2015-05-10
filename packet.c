@@ -13,13 +13,13 @@ Desc: Get and dump packets in file
 /*---------------------------------------------
 | Dump packet data in file
 ---------------------------------------------*/
-void dump_data(unsigned char* data , int size)
+void dump_data(unsigned char* data, int size)
 {
     /* Used variables */
     int i, j;
 
     /* Dump whole data */
-    for(i=0 ; i < size ; i++)
+    for(i=0; i < size; i++)
     {
         if(i && i%16 == 0)
         {
@@ -62,7 +62,7 @@ void dump_data(unsigned char* data , int size)
 /*---------------------------------------------
 | Log ip header in file
 ---------------------------------------------*/
-void log_ip(unsigned char* buf, int size)
+void log_ip(unsigned char* buf)
 {
     /* Used variables */
     struct sockaddr_in name, dst;
@@ -104,7 +104,7 @@ void log_tcp(short dump, unsigned char* buf, int size)
     struct tcphdr* tcph= (struct tcphdr*)(buf + iph_len);
 
     /* Log ip header */
-    log_ip(buf, size);
+    log_ip(buf);
 
     /* Log TCP packet header in file */
     slog_to_file("[LIVE] Captured TCP Packet");          
@@ -157,7 +157,7 @@ void log_udp(short dump, unsigned char* buf, int size)
     struct udphdr* udph = (struct udphdr*)(buf + iph_len);
 
     /* Log ip header */
-    log_ip(buf, size); 
+    log_ip(buf); 
 
     /* Log TCP packet header in file */
     slog_to_file("[LIVE] Captured UDP Packet");               

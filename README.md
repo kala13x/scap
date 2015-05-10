@@ -1,7 +1,7 @@
-sCap - Version: 1.0.3 Snapshot Build 19
+sCap - Version: 1.0.4 Snapshot Build 21
 ----
 
-sCap is open source commandline application project which makes you able to scan, capture and dump incoming tcp/udp/icmp traffic. Software is written for educational purposes and is distributed in the hope that it will be useful for anyone interested in this field.
+sCap is open source commandline application project which uses system sockets and makes you able to scan, capture and dump incoming tcp/udp/icmp traffic without libcap. Software is written for educational purposes and is distributed in the hope that it will be useful for anyone interested in this field.
 
 ###Usage
 ```
@@ -12,7 +12,7 @@ options are:
  -h         # print help and usage
 ```
 
-With option -i, you can capture incomming traffic and log ip/udp/tcp/icmp headers in file. If you add option -d, sCap will capture this headers and also it will dump incomming traffic data in file. Without those arguments, sCap only counts numbers of incoming packets.
+With option -i, you can capture incoming traffic and log ip/udp/tcp/icmp headers in file. If you add option -d, sCap will capture headers and also it will dump incoming traffic data in log file. Without those arguments, sCap only counts numbers of incoming packets.
 
 ###Installation
 Compilation of this project is possible with Makefile (just type 'make' in terminal).

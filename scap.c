@@ -232,7 +232,7 @@ int main(int argc, char **argv)
             slog(0, "[ERROR] Can not get packets");
             break;
         }
-        else read_scap_packet(&scap, &scfl, buf, size);
+        else read_scap_packet(&scap, &scfl, buf, data);
     }
 
     /* Close socket */
