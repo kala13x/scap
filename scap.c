@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------
 
- sCap is simple application for scaning and capturing incomming packets
- useing sockets.
+ sCap is simple application for scanning and capturing incoming packets
+ without libcap. sCap uses system sockets to recieve and dump traffic.
 
  Copyright (c) 2015 Sun Dro (a.k.a. 7th Ghost / kala13x)
  Web: http://off-sec.com/ ; E-Mail: kala0x13@gmail.com
@@ -25,7 +25,7 @@
 #include "slog.h"
 
 /* Max size of buffer */
-#define MAXMSG 8196
+#define MAXMSG 65536
 
 
 /*---------------------------------------------

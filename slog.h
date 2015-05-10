@@ -2,7 +2,7 @@
 
  slog is Advanced logging library for C/C++
 
- Copyright (c) 2015 Sun Dro (a.k.a. 7th Ghost)
+ Copyright (c) 2015 Sun Dro (a.k.a. 7th Ghost / kala13x)
  Web: http://off-sec.com/ ; E-Mail: kala0x13@gmail.com
 
  This is free software; you can redistribute it and/or
