@@ -1,4 +1,4 @@
-sCap - Version: 1.0.2 Snapshot Build 17
+sCap - Version: 1.0.3 Snapshot Build 19
 ----
 
 sCap is open source commandline application project which makes you able to scan, capture and dump incoming tcp/udp/icmp traffic. Software is written for educational purposes and is distributed in the hope that it will be useful for anyone interested in this field.
@@ -63,16 +63,16 @@ sCap requires root access because of binding raw socket. When you launch sCap it
     2F 1D 00 00 01 01 08 0A 40 9D 7A BE 01 4C CD 9C       /.......@.z..L..
 
 2015.05.09-20:30:38 - [DATA] Payload
-    16 03 03 00 5A 02 00 00 56 03 03 55 4F 66 FC DC         ....Z...V..UOf..
-    CC 35 04 28 FC C8 1A 72 1E 72 F6 99 5D B1 ED 6E         .5.(...r.r..]..n
-    88 60 FD B7 D6 AF 00 9E 42 68 96 20 50 32 17 BA         .`......Bh. P2..
-    D9 65 D5 14 53 A7 00 99 42 72 00 A8 E4 16 C3 34         .e..S...Br.....4
-    01 D6 D5 24 1A 6C 50 6F D4 EE A3 65 C0 2F 00 00         ...$.lPo...e./..
-    0E FF 01 00 01 00 00 10 00 05 00 03 02 68 32 14         .............h2.
-    03 03 00 01 01 16 03 03 00 28 00 00 00 00 00 00         .........(......
-    00 00 1B F6 B0 46 AD 42 77 BC C7 7D B0 6F 2A DB         .....F.Bw..}.o*.
-    2C 8F 94 58 C7 F4 04 6C 37 66 94 0E 0F BC 0D 44         ,..X...l7f.....D
-    5B A2                                                   [.
+    16 03 03 00 5A 02 00 00 56 03 03 55 4F 66 FC DC       ....Z...V..UOf..
+    CC 35 04 28 FC C8 1A 72 1E 72 F6 99 5D B1 ED 6E       .5.(...r.r..]..n
+    88 60 FD B7 D6 AF 00 9E 42 68 96 20 50 32 17 BA       .`......Bh. P2..
+    D9 65 D5 14 53 A7 00 99 42 72 00 A8 E4 16 C3 34       .e..S...Br.....4
+    01 D6 D5 24 1A 6C 50 6F D4 EE A3 65 C0 2F 00 00       ...$.lPo...e./..
+    0E FF 01 00 01 00 00 10 00 05 00 03 02 68 32 14       .............h2.
+    03 03 00 01 01 16 03 03 00 28 00 00 00 00 00 00       .........(......
+    00 00 1B F6 B0 46 AD 42 77 BC C7 7D B0 6F 2A DB       .....F.Bw..}.o*.
+    2C 8F 94 58 C7 F4 04 6C 37 66 94 0E 0F BC 0D 44       ,..X...l7f.....D
+    5B A2                                                 [.
 ```
 
 ###Feel free to fork
