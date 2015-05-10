@@ -21,44 +21,40 @@ void dump_data(unsigned char* data , int size)
     /* Dump whole data */
     for(i=0 ; i < size ; i++)
     {
-        /* Dump line in hex */
-        if( i!=0 && i%16==0)
+        if(i && i%16 == 0)
         {
             slog_file("         ");
-            for(j=i-16 ; j<i ; j++)
+            for(j = i-16; j < i; j++)
             {
-                /* Dump number */
-                if(data[j]>=32 && data[j]<=128)
-                    slog_file("%c",(unsigned char)data[j]);
+                /* Dump if number */
+                if(data[j] >= 32 && data[j] <= 128) 
+                    slog_file("%c", (unsigned char)data[j]);
                 else slog_file(".");
             }
             slog_file("\n");
         }
         
         /* Dump hex data */
-        if(i % 16 == 0) slog_file("   ");
+        if(i%16 == 0) slog_file("   ");
             slog_file(" %02X", (unsigned int)data[i]);
         
         /* Dump last spaces */
         if(i == size - 1)
         {
             /* Extra spaces */
-            for(j=0; j<15-i%16; j++) slog_file("   ");
-            
-            /* Dump another space */
+            for(j=0; j < 15-i%16; j++) slog_file("   ");
             slog_file("         ");
             
             /* Dump data */
-            for(j=i-i%16 ; j<=i ; j++)
+            for(j = i-i%16; j <= i; j++)
             {
-                if(data[j]>=32 && data[j]<=128) slog_file("%c", (unsigned char)data[j]);
+                if(data[j] >= 32 && data[j] <= 128) 
+                    slog_file("%c", (unsigned char)data[j]);
                 else slog_file(".");
             }
             slog_file("\n");
         }
     }
-
-    /* Next line */
     slog_file("\n");
 }
 
@@ -106,7 +102,7 @@ void log_tcp(short dump, unsigned char* buf, int size)
     /* Get TCP packet header */
     iph_len = iph->ihl * 4;
     struct tcphdr* tcph= (struct tcphdr*)(buf + iph_len);
-    
+
     /* Log ip header */
     log_ip(buf, size);
 
@@ -126,7 +122,7 @@ void log_tcp(short dump, unsigned char* buf, int size)
     slog_to_file("[TCP] Finish Flag          : %d", (unsigned int)tcph->fin);
     slog_to_file("[TCP] Window               : %d", ntohs(tcph->window));
     slog_to_file("[TCP] Checksum             : %d", ntohs(tcph->check));
-    slog_to_file("[TCP] Urgent Pointer       : %d\n\n", tcph->urg_ptr);
+    slog_to_file("[TCP] Urgent Pointer       : %d\n", tcph->urg_ptr);
 
     /* Dump data if flag is enabled */
     if (dump) 
@@ -141,8 +137,9 @@ void log_tcp(short dump, unsigned char* buf, int size)
              
         /* Dump data playload */
         slog_to_file("[DATA] Payload"); 
-        dump_data(buf + iph_len + (tcph->doff * 4), (size - (tcph->doff * 4 - iph->ihl * 4)));
+        dump_data(buf + iph_len + tcph->doff * 4, (size - tcph->doff * 4 - iph->ihl * 4));
     }
+    slog_file("\n");
 }
 
 
@@ -167,7 +164,7 @@ void log_udp(short dump, unsigned char* buf, int size)
     slog_to_file("[UDP] Source Port          : %d", ntohs(udph->source));
     slog_to_file("[UDP] Destination Port     : %d", ntohs(udph->dest));
     slog_to_file("[UDP] Length               : %d", ntohs(udph->len));
-    slog_to_file("[UDP] Checksum             : %d\n\n", ntohs(udph->check));
+    slog_to_file("[UDP] Checksum             : %d\n", ntohs(udph->check));
 
     /* Dump data if flag is enabled */
     if (dump) 
@@ -182,6 +179,7 @@ void log_udp(short dump, unsigned char* buf, int size)
 
         /* Dump data playload */
         slog_to_file("[DATA] Payload");  
-        dump_data(buf + iph_len + sizeof(udph), (size - (sizeof(udph) - iph->ihl * 4)));
+        dump_data(buf + iph_len + sizeof(udph), (size - sizeof(udph) - iph->ihl * 4));
     }
+    slog_file("\n");
 }
