@@ -58,6 +58,7 @@ sCap requires root access because of binding raw socket. When you launch sCap it
 2015.05.09-20:30:38 - [IP] Header
     45 28 00 53 13 3B 40 00 35 06 B4 9A C0 1E FC 57 E     (.S.;@.5......W
     C0 A8 00 89                                           ....
+    
 2015.05.09-20:30:38 - [TCP] Header
     01 BB A1 6C 1C 2A E6 84 86 29 5E 99 80 18 00 1F       ...l.*...)^.�...
     2F 1D 00 00 01 01 08 0A 40 9D 7A BE 01 4C CD 9C       /.......@.z..L..
