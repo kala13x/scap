@@ -18,6 +18,7 @@ With option -i, you can capture incoming traffic and log ip/udp/tcp/icmp headers
 Compilation of this project is possible with Makefile and build script.
 ```
 git clone https://github.com/kala13x/scap.git
+cd scap
 chmod +x build.sh
 ./build.sh
 ```
