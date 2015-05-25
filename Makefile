@@ -1,17 +1,16 @@
-LIB = -lnsl
+LIB = -lnsl libslog/slog.so
 OBJ = o
-CFLAGS = -g -O2 -Wall
+CFLAGS = -g -O2 -Wall -Ilibslog
 PREFIX = /usr/local
 
-OBJS = scap.$(OBJ) packet.$(OBJ) info.$(OBJ) slog.$(OBJ)
+OBJS = scap.$(OBJ) packet.$(OBJ) info.$(OBJ)
 
 all: $(OBJS)
 	$(CC) $(CFLAGS) -o scap $(OBJS) $(LIB)
 
-scap.$(OBJ): info.h slog.h stdinc.h
+scap.$(OBJ): info.h stdinc.h
 packet.$(OBJ): packet.h stdinc.h
 info.$(OBJ): info.h stdinc.h
-slog.$(OBJ): slog.h stdinc.h
 
 .PHONY: install
 install: scap

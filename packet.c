@@ -7,7 +7,7 @@ Desc: Get and dump packets in file
 
 
 #include "stdinc.h"
-#include "slog.h"
+#include "libslog/slog.h"
 
 
 /*---------------------------------------------

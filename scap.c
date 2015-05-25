@@ -22,7 +22,7 @@
 #include "stdinc.h"
 #include "packet.h"
 #include "info.h"
-#include "slog.h"
+#include "libslog/slog.h"
 
 /* Max size of buffer */
 #define MAXMSG 65536

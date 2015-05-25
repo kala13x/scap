@@ -15,13 +15,13 @@ options are:
 With option -i, you can capture incoming traffic and log ip/udp/tcp/icmp headers in file. If you add option -d, sCap will capture headers and also it will dump incoming traffic data in log file. Without those arguments, sCap only counts numbers of incoming packets.
 
 ###Installation
-Compilation of this project is possible with Makefile (just type 'make' in terminal).
+Compilation of this project is possible with Makefile and build script.
 ```
 git clone https://github.com/kala13x/scap.git
-cd  scap
-make
-sudo make install
+chmod +x build.sh
+./build.sh
 ```
+
 ###How to use
 sCap requires root access because of binding raw socket. When you launch sCap it only counts numbers of packets, but at the some time you can tail log file to see dumped data. 
 
