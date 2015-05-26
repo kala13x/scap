@@ -1,18 +1,22 @@
-/*-----------------------------------------------------
-Name: packet.c
-Date: 2015.05.09
-Auth: kala13x (a.k.a 7th Ghost / kala13x)
-Desc: Get and dump packets in file
------------------------------------------------------*/
+/*
+ * packet.c
+ * Copyleft (C) 2015  Sun Dro (a.k.a 7th Ghost)
+ *
+ * Get and dump packets in file
+ */
 
 
 #include "stdinc.h"
 #include "libslog/slog.h"
 
 
-/*---------------------------------------------
-| Dump packet data in file
----------------------------------------------*/
+/*
+ * Dump packet data in file. Function tackes parsed packet data and
+ * dumps it in log file.
+ * 
+ * First argument is buffer of parsed data and second argument is
+ * buffer size of data.
+ */
 void dump_data(unsigned char* data, int size)
 {
     /* Used variables */
@@ -59,9 +63,12 @@ void dump_data(unsigned char* data, int size)
 }
 
 
-/*---------------------------------------------
-| Log ip header in file
----------------------------------------------*/
+/*
+ * Log IP Packet header in file. Function takes packet buffer, 
+ * parses it and dumps parsed header information in file.
+ *
+ * Argument is is packet buffer recieved from socket. 
+ */
 void log_ip(unsigned char* buf)
 {
     /* Used variables */
@@ -90,9 +97,14 @@ void log_ip(unsigned char* buf)
 }
 
 
-/*---------------------------------------------
-| Log tcp packets in file
----------------------------------------------*/
+/*
+ * Log TCP Packet header in file. Function takes packet buffer, parses
+ * it and dumps parsed header information in file.
+ *
+ * First argument is dump flag, if first argument is 1, function will
+ * dump packet payload in log file, otherwise it wont. Second argument
+ * is packet buffer recieved from socket, third argument is packet size. 
+ */
 void log_tcp(short dump, unsigned char* buf, int size)
 {
     /* Used variables */
@@ -143,9 +155,14 @@ void log_tcp(short dump, unsigned char* buf, int size)
 }
 
 
-/*---------------------------------------------
-| Log udp packets in file
----------------------------------------------*/
+/*
+ * Log UDP Packet header in file. Function takes packet buffer, parses
+ * it and dumps parsed header information in file.
+ *
+ * First argument is dump flag, if first argument is 1, function will
+ * dump packet payload in log file, otherwise it wont. Second argument
+ * is packet buffer recieved from socket, third argument is packet size. 
+ */
 void log_udp(short dump, unsigned char* buf, int size)
 {
     /* Used variables */

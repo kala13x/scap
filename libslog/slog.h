@@ -1,5 +1,5 @@
 /*
- *  slog is Advanced logging library for C/C++
+ * slog is Advanced logging library for C/C++
  *
  *  Copyright (c) 2015 Sun Dro (a.k.a. 7th Ghost)
  *  Web: http://off-sec.com/ ; E-Mail: kala0x13@gmail.com

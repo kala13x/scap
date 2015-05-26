@@ -1,18 +1,19 @@
-/*-----------------------------------------------------
-Name: info.c
-Date: 2015.05.09
-Auth: kala13x (a.k.a 7th Ghost / kala13x)
-Desc: Get and print additional information
------------------------------------------------------*/
+/*
+ * info.c
+ * Copyleft (C) 2015  Sun Dro (a.k.a 7th Ghost)
+ *
+ * Get and print additional information
+ */
 
 
 #include "stdinc.h"
 #include "info.h"
 
 
-/*---------------------------------------------
-| Get application version
----------------------------------------------*/
+/* 
+ * Get version. Function returns version and build number of 
+ * application. Return value is static char pointer.
+ */
 const char* get_version()
 {
     static char version[128];
@@ -21,9 +22,10 @@ const char* get_version()
 }
 
 
-/*---------------------------------------------
-| Greet users
----------------------------------------------*/
+/*
+ * Greet users. Function prints application name, version and
+ * build number.
+ */
 void greet(void) 
 {
     printf("============================================\n");
@@ -32,9 +34,9 @@ void greet(void)
 } 
 
 
-/*---------------------------------------------
-| Print usage
----------------------------------------------*/
+/*
+ * Print help and usage
+ */
 void usage(void) 
 {
     printf("Usage: scap [-i] [-d] [-h]\n");

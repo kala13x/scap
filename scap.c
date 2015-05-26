@@ -1,22 +1,20 @@
-/*---------------------------------------------------------------------------
-
- sCap is simple application for scanning and capturing incoming packets
- without libcap. sCap uses system sockets to recieve and dump traffic.
-
- Copyright (c) 2015 Sun Dro (a.k.a. 7th Ghost / kala13x)
- Web: http://off-sec.com/ ; E-Mail: kala0x13@gmail.com
-
- This is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 3 of the License, or (at your option) any later version.
-
- This software is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
----------------------------------------------------------------------------*/
+/*
+ * sCap is simple application for scanning and capturing incoming packets
+ * without libcap. sCap uses system sockets to recieve and dump traffic.
+ *
+ *  Copyright (c) 2015 Sun Dro (a.k.a. 7th Ghost)
+ *  Web: http://off-sec.com/ ; E-Mail: kala0x13@gmail.com
+ *
+ * This is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ */
 
 
 #include "stdinc.h"
@@ -28,9 +26,7 @@
 #define MAXMSG 65536
 
 
-/*---------------------------------------------
-| Structure of packets
----------------------------------------------*/
+/* Structure of packets */
 typedef struct {
     int tcp;
     int udp; 
@@ -41,18 +37,14 @@ typedef struct {
 } ScapPackets;
 
 
-/*---------------------------------------------
-| Structure of flags
----------------------------------------------*/
+/* Structure of flags */
 typedef struct {
     short info;
     short data;
 } ScapFlags;
 
 
-/*---------------------------------------------
-| Initialise sCap packets
----------------------------------------------*/
+/* Initialize sCap packets */
 void init_scap_packets(ScapPackets * scap) 
 {
     scap->tcp = 0;
@@ -64,9 +56,7 @@ void init_scap_packets(ScapPackets * scap)
 }
 
 
-/*---------------------------------------------
-| Initialise sCap flags
----------------------------------------------*/
+/* Initialize sCap flags */
 void init_scap_flags(ScapFlags * scfl) 
 {
     scfl->info = 0;
@@ -74,9 +64,10 @@ void init_scap_flags(ScapFlags * scfl)
 }
 
 
-/*---------------------------------------------
-| Read signal
----------------------------------------------*/
+/*
+ * Read signal. Function handles illegal signals and intertupts
+ * program if there is something wrong.
+ */
 void sig_handler(int sig) 
 {
     /* Handle signals */
@@ -93,9 +84,9 @@ void sig_handler(int sig)
 }
 
 
-/*---------------------------------------------
-| Create socket
----------------------------------------------*/
+/* 
+ * Create socket. Function creates and returns raw socket.
+ */
 int create_socket()
 {
     /* Used variables */
@@ -113,9 +104,10 @@ int create_socket()
 }
 
 
-/*---------------------------------------------
-| Process packets
----------------------------------------------*/
+/*
+ * Process packets. Fucntion reads incoming packets and starts 
+ * packet parsing.
+ */
 void read_scap_packet(ScapPackets * scap, 
                     ScapFlags * scfl,
                     unsigned char* buf, 
@@ -161,9 +153,7 @@ void read_scap_packet(ScapPackets * scap,
 }
 
 
-/*---------------------------------------------
-| Parse cli arguments
----------------------------------------------*/
+/* Parse cli arguments */
 static int parse_arguments(int argc, char *argv[], ScapFlags * scfl)
 {
     int c;
@@ -186,9 +176,7 @@ static int parse_arguments(int argc, char *argv[], ScapFlags * scfl)
 }
 
 
-/*---------------------------------------------
-| Main function
----------------------------------------------*/
+/* Main function */
 int main(int argc, char **argv)
 {
     /* Used variables */

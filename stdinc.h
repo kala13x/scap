@@ -1,9 +1,9 @@
-/*-----------------------------------------------------
-Name: stdinc.h
-Date: 2015.05.09
-Auth: Sun Dro (a.k.a 7th Ghost / kala13x)
-Desc: Standart includes for scap project
------------------------------------------------------*/
+/*
+ * stdinc.h
+ * Copyleft (C) 2015  Sun Dro (a.k.a 7th Ghost)
+ *
+ * Standart includes for scap project
+ */
 
 /* Linux includes */
 #include <netinet/ip_icmp.h>    
