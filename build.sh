@@ -1,10 +1,10 @@
 #!/bin/bash
 
-cd ${PWD##}/libslog
+cd ${PWD##}/slog
 make clean
 make
 
-cd ..
+cd ../src
 make clean
 make
 

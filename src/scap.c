@@ -19,8 +19,9 @@
 
 #include "stdinc.h"
 #include "packet.h"
+#include "errex.h"
 #include "info.h"
-#include "libslog/slog.h"
+#include "../slog/slog.h"
 
 /* Max size of buffer */
 #define MAXMSG 65536
@@ -65,27 +66,27 @@ void init_scap_flags(ScapFlags * scfl)
 
 
 /*
- * Read signal. Function handles illegal signals and intertupts
- * program if there is something wrong.
+ * Read signal. Function handles illegal signals and 
+ * intertupts program if there is something wrong.
  */
 void sig_handler(int sig) 
 {
     /* Handle signals */
     if (sig == SIGILL || sig == SIGSEGV) 
-        slog(0, "[ERROR] Can not process data");
+        slog(0, SLOG_ERROR, "Can not process data");
 
     if (sig == SIGPIPE)
-        slog(0, "[ERROR] Broken Pipe");
+        slog(0, SLOG_ERROR, "Broken Pipe");
 
     if (sig == SIGINT) 
-        slog(0, "[LIVE] Cleanup on exit");
+        slog(0, SLOG_LIVE, "Cleanup on exit");
 
     exit(-1);
 }
 
 
 /* 
- * Create socket. Function creates and returns raw socket.
+ * create_socket - Function creates and returns raw socket.
  */
 int create_socket()
 {
@@ -95,18 +96,15 @@ int create_socket()
     /* Create raw socket */
     sock = socket(AF_INET , SOCK_RAW , IPPROTO_TCP);
     if (sock < 0)
-    {
-        slog(0, "[ERROR] Can not create socket (requires root)");
-        exit(EXIT_FAILURE);
-    }
-
+        exit_prog(1, "Can not create raw socket (requires root)");
+    
     return sock;
 }
 
 
 /*
- * Process packets. Fucntion reads incoming packets and starts 
- * packet parsing.
+ * read_scap_packet - Fucntion reads incomming 
+ * packets and starts packet parsing and hexdump.
  */
 void read_scap_packet(ScapPackets * scap, 
                     ScapFlags * scfl,
@@ -167,7 +165,7 @@ static int parse_arguments(int argc, char *argv[], ScapFlags * scfl)
             break;
         case 'h':
         default:
-            usage();
+            usage(argv[0]);
             return -1;
         }
     }
@@ -176,7 +174,6 @@ static int parse_arguments(int argc, char *argv[], ScapFlags * scfl)
 }
 
 
-/* Main function */
 int main(int argc, char **argv)
 {
     /* Used variables */
@@ -192,13 +189,13 @@ int main(int argc, char **argv)
     signal(SIGSEGV, sig_handler);
     signal(SIGILL , sig_handler);
 
+    /* Greet */
+    greet("sCap");
+
     /* Initialise scap */
     init_scap_packets(&scap);
     init_scap_flags(&scfl);
-    init_slog("scap", 2);
-
-    /* Greet */
-    greet();
+    init_slog("scap", "config.cfg", 2);
 
     /* Parse Commandline Arguments */
     if (parse_arguments(argc, argv, &scfl)) 
@@ -217,7 +214,7 @@ int main(int argc, char **argv)
         data = recvfrom(sock, buf, sizeof(buf), 0, &addr, (socklen_t *)&size);
         if(data < 0)
         {
-            slog(0, "[ERROR] Can not get packets");
+            slog(0, SLOG_ERROR, "Can not get packets");
             break;
         }
         else read_scap_packet(&scap, &scfl, buf, data);
