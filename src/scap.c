@@ -40,8 +40,51 @@ typedef struct {
 
 /* Structure of flags */
 typedef struct {
+    /* dump header info in file */
     short info;
+    
+    /* dump data in file */
     short data;
+    
+    /* flags for export in PCAP */
+    short should_export_pcap;
+    FILE * file_export_pcap;
+    
+    /* flags for filter for source ip */
+    short should_filter_ip_src;
+    struct in_addr ip_src;
+    
+    /* flags for filter for destination ip */
+    short should_filter_ip_dst;
+    struct in_addr ip_dst;
+    
+    /* flags for source port */
+    short should_filter_port_src;
+    unsigned int port_src;
+    
+    /* flags for destination port */
+    short should_filter_port_dst;
+    unsigned int port_dst;
+    
+    /* flags for TTL filter */
+    short should_filter_ttl_min;
+    unsigned int ttl_min;
+    short should_filter_ttl_max;
+    unsigned int ttl_max;
+    
+    /* flags for fragment number */
+    short should_filter_frag_min;
+    unsigned int frag_min;
+    short should_filter_frag_max;
+    unsigned int frag_max;
+    
+    /* flags for filter protocols */
+    short should_filter_protocol;
+    short should_filter_tcp;
+    short should_filter_udp;
+    short should_filter_icmp;
+    short should_filter_igmp;
+    
 } ScapFlags;
 
 
@@ -62,6 +105,18 @@ void init_scap_flags(ScapFlags * scfl)
 {
     scfl->info = 0;
     scfl->data = 0;
+    scfl->should_export_pcap = 0;
+    scfl->should_filter_ip_src = 0;
+    scfl->should_filter_ip_dst = 0;
+    scfl->should_filter_ttl_min = 0;
+    scfl->should_filter_ttl_max = 0;
+    scfl->should_filter_frag_min = 0;
+    scfl->should_filter_frag_max = 0;
+    scfl->should_filter_protocol = 0;
+    scfl->should_filter_tcp = 0;
+    scfl->should_filter_udp = 0;
+    scfl->should_filter_icmp = 0;
+    scfl->should_filter_igmp = 0;
 }
 
 
@@ -103,6 +158,39 @@ int create_socket()
 
 
 /*
+ * write_packet_pcap - Write the packet in to the pcap file
+ * wont work with multi-threading because of several fwrite calls
+ */
+void write_packet_pcap(ScapFlags * scfl,
+                       unsigned char* buf,
+                       int size)
+{
+    struct timeval current_time;
+    uint32_t var_32bits;
+    
+    gettimeofday(&current_time, NULL);
+    
+    /* timestamp in seconds */
+    var_32bits = (uint32_t) current_time.tv_sec;
+    fwrite(&var_32bits, sizeof(var_32bits), 1, scfl->file_export_pcap);
+    
+    /* microseconds */
+    var_32bits = (uint32_t) current_time.tv_usec;
+    fwrite(&var_32bits, sizeof(var_32bits), 1, scfl->file_export_pcap);
+    
+    /* captured packet length */
+    var_32bits = (uint32_t) size;
+    fwrite(&var_32bits, sizeof(var_32bits), 1, scfl->file_export_pcap);
+    
+    /* original packet length */
+    fwrite(&var_32bits, sizeof(var_32bits), 1, scfl->file_export_pcap);
+    
+    /* packet data */
+    fwrite(buf, size, 1, scfl->file_export_pcap);
+}
+
+
+/*
  * read_scap_packet - Fucntion reads incomming 
  * packets and starts packet parsing and hexdump.
  */
@@ -114,27 +202,114 @@ void read_scap_packet(ScapPackets * scap,
     /* Used variables */
     struct iphdr* iph = (struct iphdr*)buf;
     char* out_line;
+    unsigned short iph_len;
+    struct tcphdr* tcph;
+    struct udphdr* udph;
+
+    if (scfl->should_filter_ip_src) {
+        if ((scfl->ip_src).s_addr != iph->saddr) {
+            return;
+        }
+    }
+
+    if (scfl->should_filter_ip_dst) {
+        if ((scfl->ip_dst).s_addr != iph->daddr) {
+            return;
+        }
+    }
+
+    if (scfl->should_filter_ttl_min) {
+        if (iph->ttl < scfl->ttl_min) {
+            return;
+        }
+    }
+
+    if (scfl->should_filter_ttl_max) {
+        if (iph->ttl > scfl->ttl_max) {
+            return;
+        }
+    }
+
+    if (scfl->should_filter_frag_min) {
+        if (iph->frag_off < scfl->frag_min) {
+            return;
+        }
+    }
+
+    if (scfl->should_filter_frag_max) {
+        if (iph->frag_off > scfl->frag_max) {
+            return;
+        }
+    }
+
+    iph_len = iph->ihl * 4;
 
     /* Get IP header */
     switch (iph->protocol)
     {
         case 1:
+            if (scfl->should_filter_protocol && !scfl->should_filter_icmp) {
+                return;
+            }
+
             ++scap->icmp;
             break;
+
         case 2:
+            if (scfl->should_filter_protocol && !scfl->should_filter_igmp) {
+                return;
+            }
+
             ++scap->igmp;
             break;
+
         case 6:
+            if (scfl->should_filter_protocol && !scfl->should_filter_tcp) {
+                return;
+            }
+
             ++scap->tcp;
+
+            tcph = (struct tcphdr*)(buf + iph_len);
+
+            if (scfl->should_filter_port_src && ntohs(tcph->source) != scfl->port_src) {
+                return;
+            }
+
+            if (scfl->should_filter_port_dst && ntohs(tcph->dest) != scfl->port_dst) {
+                return;
+            }
+
             if (scfl->info || scfl->data) 
                 log_tcp(scfl->data, buf, size);
             break;
+
         case 17:
+            if (scfl->should_filter_protocol && !scfl->should_filter_udp) {
+                return;
+            }
+
             ++scap->udp;
+
+            udph = (struct udphdr*)(buf + iph_len);
+
+            if (scfl->should_filter_port_src && ntohs(udph->source) != scfl->port_src) {
+                return;
+            }
+
+            if (scfl->should_filter_port_dst && ntohs(udph->dest) != scfl->port_dst) {
+                return;
+            }
+
             if (scfl->info || scfl->data) 
                 log_udp(scfl->data, buf, size);
             break;
+
         default:
+            if (scfl->should_filter_protocol) {
+                return;
+            }
+
             ++scap->other;
             break;
     }
@@ -148,21 +323,169 @@ void read_scap_packet(ScapPackets * scap,
 
     /* Print status */
     printf("%s\r", out_line);
+    
+    if (scfl->should_export_pcap && scfl->file_export_pcap != NULL)
+    {
+        write_packet_pcap(scfl, buf, size);
+    }
 }
 
+
+/* 
+ * Insert the PCAP File header 
+ * Definition of the header is in the link:
+ * http://xml2rfc.tools.ietf.org/cgi-bin/xml2rfc.cgi?url=https://raw.githubusercontent.com/pcapng/pcapng/master/draft-gharris-opsawg-pcap.xml&modeAsFormat=html/ascii&type=ascii
+ */
+void init_pcap_file(FILE *pcap_file)
+{
+    uint32_t magic_number = 0xA1B2C3D4;
+    fwrite(&magic_number, sizeof(magic_number), 1, pcap_file);
+    
+    uint16_t major_version = 2;
+    fwrite(&major_version, sizeof(major_version), 1, pcap_file);
+    
+    uint16_t minor_version = 4;
+    fwrite(&minor_version, sizeof(minor_version), 1, pcap_file);
+    
+    uint32_t reserved = 0;
+    fwrite(&reserved, sizeof(reserved), 1, pcap_file);
+    fwrite(&reserved, sizeof(reserved), 1, pcap_file);
+    
+    /* we can use the upper limit, instead of the size of the largest packet */
+    uint32_t snap_len = MAXMSG;
+    fwrite(&snap_len, sizeof(snap_len), 1, pcap_file);
+    
+    uint32_t link_type = 0;
+    fwrite(&link_type, sizeof(link_type), 1, pcap_file);
+}
 
 /* Parse cli arguments */
 static int parse_arguments(int argc, char *argv[], ScapFlags * scfl)
 {
     int c;
-    while ( (c = getopt(argc, argv, "i1:d1:h1")) != -1) {
+    int sscanf_result;
+    while ( (c = getopt(argc, argv, "i1:d1:h1:o:s:t:p:q:l:m:f:g:")) != -1) {
         switch (c) {
+        /* dump header info in file */
         case 'i':
             scfl->info = 1;
             break;
+        
+        /* dump data in file */
         case 'd':
             scfl->data = 1;
             break;
+        
+        /* file output in pcap */
+        case 'o':
+            scfl->should_export_pcap = 1;
+            if (strlen(optarg) == 0) {
+                printf("Invalid filename for export.\n");
+                return -1;
+            }
+            
+            scfl->file_export_pcap = fopen(optarg, "wb");
+            
+            if (scfl->file_export_pcap == NULL) {
+                printf("Could not open the file '%s' to export.\n", optarg);
+                return -1;
+            }
+            
+            init_pcap_file(scfl->file_export_pcap);
+            
+            break;
+        
+        /* source Ip address */
+        case 's':
+            scfl->should_filter_ip_src = 1;
+            if (inet_aton(optarg, &(scfl->ip_src)) == 0) {
+                printf("Invalid IP for source address.\n");
+                return -1;
+            }
+            break;
+        
+        /* destination Ip address */
+        case 't':
+            scfl->should_filter_ip_dst = 1;
+            if (inet_aton(optarg, &(scfl->ip_dst)) == 0) {
+                printf("Invalid IP for destination address.\n");
+                return -1;
+            }
+            break;
+        
+        /* source port */
+        case 'p':
+            scfl->should_filter_port_src = 1;
+            sscanf_result = sscanf(optarg, "%u", &(scfl->port_src));
+            if (sscanf_result != 1) {
+                printf("Invalid port for source.\n");
+                return -1;
+            }
+            
+            /* since port is TCP/UDP only, need filter for TCP/UDP only */
+            scfl->should_filter_protocol = 1;
+            scfl->should_filter_tcp = 1;
+            scfl->should_filter_udp = 1;
+            
+            break;
+        
+        /* destination port */
+        case 'q':
+            scfl->should_filter_port_dst = 1;
+            sscanf_result = sscanf(optarg, "%u", &(scfl->port_dst));
+            if (sscanf_result != 1) {
+                printf("Invalid port for destination.\n");
+                return -1;
+            }
+            
+            /* since port is TCP/UDP only, need filter for TCP/UDP only */
+            scfl->should_filter_protocol = 1;
+            scfl->should_filter_tcp = 1;
+            scfl->should_filter_udp = 1;
+            
+            break;
+        
+        /* ttl min */
+        case 'l':
+            scfl->should_filter_ttl_min = 1;
+            sscanf_result = sscanf(optarg, "%u", &(scfl->ttl_min));
+            if (sscanf_result != 1) {
+                printf("Invalid TTL min.\n");
+                return -1;
+            }
+            break;
+            
+        /* ttl max */
+        case 'm':
+            scfl->should_filter_ttl_max = 1;
+            sscanf_result = sscanf(optarg, "%u", &(scfl->ttl_max));
+            if (sscanf_result != 1) {
+                printf("Invalid TTL max.\n");
+                return -1;
+            }
+            break;
+        
+        /* frag min */
+        case 'f':
+            scfl->should_filter_frag_min = 1;
+            sscanf_result = sscanf(optarg, "%u", &(scfl->frag_min));
+            if (sscanf_result != 1) {
+                printf("Invalid minimum fragment number.\n");
+                return -1;
+            }
+            break;
+            
+        /* frag max */
+        case 'g':
+            scfl->should_filter_frag_max = 1;
+            sscanf_result = sscanf(optarg, "%u", &(scfl->frag_max));
+            if (sscanf_result != 1) {
+                printf("Invalid maximum fragment number.\n");
+                return -1;
+            }
+            break;
+        
+        /* help */    
         case 'h':
         default:
             usage(argv[0]);
@@ -222,6 +545,11 @@ int main(int argc, char **argv)
 
     /* Close socket */
     close(sock);
+
+    if (scfl.should_export_pcap && scfl.file_export_pcap != NULL)
+    {
+        fclose(scfl.file_export_pcap);
+    }
 
     return 0;
 }
