@@ -44,10 +44,21 @@ void greet(char *p_name)
  */
 void usage(char *fname)
 {
-    printf("\nUsage: %s [-i] [-d] [-h]\n", fname);
+    printf("\nUsage: %s [options]\n", fname);
     printf("Options are:\n");
     printf("   -i         # dump header info in file\n");
     printf("   -d         # dump data in file\n");
     printf("   -h         # print help and usage\n");
+    printf("   -o filename # export output to PCAP file\n");
+    printf("   -s ip_src   # filter packets by IP source\n");
+    printf("   -t ip_dst   # filter packets by IP destination\n");
+    printf("   -p port_src # filter packets by source port\n");
+    printf("                 will filter TCP and UDP only\n");
+    printf("   -q port_src # filter packets by destination port\n");
+    printf("                 will filter TCP and UDP only\n");
+    printf("   -l ttl_min  # filter packets by minimun TTL\n");
+    printf("   -m ttl_max  # filter packets by maximum TTL\n");
+    printf("   -f frag_min # filter packets by minimum fragment number\n");
+    printf("   -g frag_max # filter packets by maximun fragment number\n");
     printf("\n");
 }

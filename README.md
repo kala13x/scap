@@ -10,6 +10,17 @@ options are:
  -i         # dump header info in file
  -d         # dump data in file
  -h         # print help and usage
+ -o filename # export output to PCAP file
+ -s ip_src   # filter packets by IP source
+ -t ip_dst   # filter packets by IP destination
+ -p port_src # filter packets by source port
+               will filter TCP and UDP only
+ -q port_src # filter packets by destination port
+               will filter TCP and UDP only
+ -l ttl_min  # filter packets by minimun TTL
+ -m ttl_max  # filter packets by maximum TTL
+ -f frag_min # filter packets by minimum fragment number
+ -g frag_max # filter packets by maximun fragment number
 ```
 
 With option -i, you can capture incoming traffic and log ip/udp/tcp/icmp headers in file. If you add option -d, sCap will capture headers and also it will hexdump incoming traffic data in log file. Without those arguments, sCap only counts numbers of incoming packets.
